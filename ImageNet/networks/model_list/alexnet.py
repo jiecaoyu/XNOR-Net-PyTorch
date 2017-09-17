@@ -77,7 +77,7 @@ class AlexNet(nn.Module):
         )
         self.classifier = nn.Sequential(
             BinConv2d(256 * 6 * 6, 4096, Linear=True),
-            BinConv2d(4096, 4096, Linear=True),
+            BinConv2d(4096, 4096, dropout=0.5, Linear=True),
             nn.BatchNorm1d(4096, eps=1e-3, momentum=0.1, affine=False),
             nn.Dropout(),
             nn.Linear(4096, num_classes),
@@ -87,7 +87,6 @@ class AlexNet(nn.Module):
         x = self.features(x)
         x = x.view(x.size(0), 256 * 6 * 6)
         x = self.classifier(x)
-        x = x.view(x.size(0), self.num_classes)
         return x
 
 
