@@ -14,6 +14,7 @@ import torch.utils.data.distributed
 # import torchvision.transforms as transforms
 # import torchvision.datasets as datasets
 import model_list
+# import util
 
 # set the seed
 torch.manual_seed(1)
@@ -39,12 +40,12 @@ parser.add_argument('--start-epoch', default=0, type=int, metavar='N',
                     help='manual epoch number (useful on restarts)')
 parser.add_argument('-b', '--batch-size', default=256, type=int,
                     metavar='N', help='mini-batch size (default: 256)')
-parser.add_argument('--lr', '--learning-rate', default=0.01, type=float,
+parser.add_argument('--lr', '--learning-rate', default=0.0001, type=float,
                     metavar='LR', help='initial learning rate')
 parser.add_argument('--momentum', default=0.90, type=float, metavar='M',
                     help='momentum')
-parser.add_argument('--weight-decay', '--wd', default=5e-4, type=float,
-                    metavar='W', help='weight decay (default: 5e-4)')
+parser.add_argument('--weight-decay', '--wd', default=1e-5, type=float,
+                    metavar='W', help='weight decay (default: 1e-5)')
 parser.add_argument('--print-freq', '-p', default=10, type=int,
                     metavar='N', help='print frequency (default: 10)')
 parser.add_argument('--resume', default='', type=str, metavar='PATH',
@@ -62,6 +63,8 @@ parser.add_argument('--dist-backend', default='gloo', type=str,
 
 best_prec1 = 0
 
+# define global bin_op
+bin_op = None
 
 def main():
     global args, best_prec1
@@ -93,8 +96,7 @@ def main():
     # define loss function (criterion) and optimizer
     criterion = nn.CrossEntropyLoss().cuda()
 
-    optimizer = torch.optim.SGD(model.parameters(), args.lr,
-                                momentum=args.momentum,
+    optimizer = torch.optim.Adam(model.parameters(), args.lr,
                                 weight_decay=args.weight_decay)
 
     # optionally resume from a checkpoint
@@ -158,6 +160,10 @@ def main():
         validate(val_loader, model, criterion)
         return
 
+    # define the binarization operator
+    global bin_op
+    bin_op = util.BinOp(model)
+
     for epoch in range(args.start_epoch, args.epochs):
         if args.distributed:
             train_sampler.set_epoch(epoch)
@@ -200,6 +206,9 @@ def train(train_loader, model, criterion, optimizer, epoch):
         input_var = torch.autograd.Variable(input)
         target_var = torch.autograd.Variable(target)
 
+        # process the weights including binarization
+        bin_op.binarization()
+        
         # compute output
         output = model(input_var)
         loss = criterion(output, target_var)
@@ -213,6 +222,11 @@ def train(train_loader, model, criterion, optimizer, epoch):
         # compute gradient and do SGD step
         optimizer.zero_grad()
         loss.backward()
+
+        # restore weights
+        bin_op.restore()
+        bin_op.updateBinaryGradWeight()
+
         optimizer.step()
 
         # measure elapsed time
@@ -241,6 +255,7 @@ def validate(val_loader, model, criterion):
     model.eval()
 
     end = time.time()
+    bin_op.binarization()
     for i, (input, target) in enumerate(val_loader):
         target = target.cuda(async=True)
         input_var = torch.autograd.Variable(input, volatile=True)
@@ -268,6 +283,7 @@ def validate(val_loader, model, criterion):
                   'Prec@5 {top5.val:.3f} ({top5.avg:.3f})'.format(
                    i, len(val_loader), batch_time=batch_time, loss=losses,
                    top1=top1, top5=top5))
+    bin_op.restore()
 
     print(' * Prec@1 {top1.avg:.3f} Prec@5 {top5.avg:.3f}'
           .format(top1=top1, top5=top5))
