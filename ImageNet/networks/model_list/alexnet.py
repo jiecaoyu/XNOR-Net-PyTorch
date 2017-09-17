@@ -13,20 +13,20 @@ class BinActive(torch.autograd.Function):
     def forward(self, input):
         self.save_for_backward(input)
         size = input.size()
-        mean = torch.mean(input.abs(), 1, keepdim=True)
         input = input.sign()
-        return input, mean
+        return input
 
-    def backward(self, grad_output, grad_output_mean):
+    def backward(self, grad_output):
         input, = self.saved_tensors
         grad_input = grad_output.clone()
         grad_input[input.ge(1)] = 0
         grad_input[input.le(-1)] = 0
         return grad_input
 
-class BinConv2d(nn.Module):
+class BinConv2d(nn.Module): # change the name of BinConv2d
     def __init__(self, input_channels, output_channels,
-            kernel_size=-1, stride=-1, padding=-1, groups=1, dropout=0):
+            kernel_size=-1, stride=-1, padding=-1, groups=1, dropout=0,
+            Linear=False):
         super(BinConv2d, self).__init__()
         self.layer_type = 'BinConv2d'
         self.kernel_size = kernel_size
@@ -34,19 +34,27 @@ class BinConv2d(nn.Module):
         self.padding = padding
         self.dropout_ratio = dropout
 
-        self.bn = nn.BatchNorm2d(input_channels, eps=1e-4, momentum=0.1, affine=False)
         if dropout!=0:
             self.dropout = nn.Dropout(dropout)
-        self.conv = nn.Conv2d(input_channels, output_channels,
-                kernel_size=kernel_size, stride=stride, padding=padding, groups=groups)
+        self.Linear = Linear
+        if not self.Linear:
+            self.bn = nn.BatchNorm2d(input_channels, eps=1e-4, momentum=0.1, affine=False)
+            self.conv = nn.Conv2d(input_channels, output_channels,
+                    kernel_size=kernel_size, stride=stride, padding=padding, groups=groups)
+        else:
+            self.bn = nn.BatchNorm1d(input_channels, eps=1e-4, momentum=0.1, affine=False)
+            self.linear = nn.Linear(input_channels, output_channels)
         self.relu = nn.ReLU(inplace=True)
     
     def forward(self, x):
         x = self.bn(x)
-        x, mean = BinActive()(x)
+        x = BinActive()(x)
         if self.dropout_ratio!=0:
             x = self.dropout(x)
-        x = self.conv(x)
+        if not self.Linear:
+            x = self.conv(x)
+        else:
+            x = self.linear(x)
         x = self.relu(x)
         return x
 
@@ -68,15 +76,16 @@ class AlexNet(nn.Module):
             nn.MaxPool2d(kernel_size=3, stride=2),
         )
         self.classifier = nn.Sequential(
-            BinConv2d(256, 4096, kernel_size=6, stride=1, padding=0),
-            BinConv2d(4096, 4096, kernel_size=1, stride=1, padding=0, dropout=0.5),
-            nn.BatchNorm2d(4096, eps=1e-3, momentum=0.1, affine=False),
+            BinConv2d(256 * 6 * 6, 4096, Linear=True),
+            BinConv2d(4096, 4096, Linear=True),
+            nn.BatchNorm1d(4096, eps=1e-3, momentum=0.1, affine=False),
             nn.Dropout(),
-            nn.Conv2d(4096, num_classes, kernel_size=1, stride=1, padding=0),
+            nn.Linear(4096, num_classes),
         )
 
     def forward(self, x):
         x = self.features(x)
+        x = x.view(x.size(0), 256 * 6 * 6)
         x = self.classifier(x)
         x = x.view(x.size(0), self.num_classes)
         return x

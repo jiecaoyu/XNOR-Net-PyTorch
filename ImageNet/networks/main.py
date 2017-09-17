@@ -14,7 +14,7 @@ import torch.utils.data.distributed
 # import torchvision.transforms as transforms
 # import torchvision.datasets as datasets
 import model_list
-# import util
+import util
 
 # set the seed
 torch.manual_seed(1)
