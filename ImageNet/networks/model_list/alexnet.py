@@ -38,11 +38,11 @@ class BinConv2d(nn.Module): # change the name of BinConv2d
             self.dropout = nn.Dropout(dropout)
         self.Linear = Linear
         if not self.Linear:
-            self.bn = nn.BatchNorm2d(input_channels, eps=1e-4, momentum=0.1, affine=False)
+            self.bn = nn.BatchNorm2d(input_channels, eps=1e-4, momentum=0.1, affine=True)
             self.conv = nn.Conv2d(input_channels, output_channels,
                     kernel_size=kernel_size, stride=stride, padding=padding, groups=groups)
         else:
-            self.bn = nn.BatchNorm1d(input_channels, eps=1e-4, momentum=0.1, affine=False)
+            self.bn = nn.BatchNorm1d(input_channels, eps=1e-4, momentum=0.1, affine=True)
             self.linear = nn.Linear(input_channels, output_channels)
         self.relu = nn.ReLU(inplace=True)
     
@@ -65,7 +65,7 @@ class AlexNet(nn.Module):
         self.num_classes = num_classes
         self.features = nn.Sequential(
             nn.Conv2d(3, 96, kernel_size=11, stride=4, padding=0),
-            nn.BatchNorm2d(96, eps=1e-4, momentum=0.1, affine=False),
+            nn.BatchNorm2d(96, eps=1e-4, momentum=0.1, affine=True),
             nn.ReLU(inplace=True),
             nn.MaxPool2d(kernel_size=3, stride=2),
             BinConv2d(96, 256, kernel_size=5, stride=1, padding=2, groups=2),
@@ -78,7 +78,7 @@ class AlexNet(nn.Module):
         self.classifier = nn.Sequential(
             BinConv2d(256 * 6 * 6, 4096, Linear=True),
             BinConv2d(4096, 4096, dropout=0.5, Linear=True),
-            nn.BatchNorm1d(4096, eps=1e-3, momentum=0.1, affine=False),
+            nn.BatchNorm1d(4096, eps=1e-3, momentum=0.1, affine=True),
             nn.Dropout(),
             nn.Linear(4096, num_classes),
         )

@@ -99,14 +99,6 @@ def main():
     optimizer = torch.optim.Adam(model.parameters(), args.lr,
                                 weight_decay=args.weight_decay)
 
-    for m in model.modules():
-        if isinstance(m, nn.Conv2d):
-            m.weight.data = m.weight.data.normal_(0.0, 0.05)
-            m.bias.data = m.bias.data.zero_()
-        elif isinstance(m, nn.Linear):
-            m.weight.data = m.weight.data.normal_(0.0, 0.01)
-            m.bias.data = m.bias.data.zero_()
-
     # optionally resume from a checkpoint
     if args.resume:
         if os.path.isfile(args.resume):
@@ -118,6 +110,7 @@ def main():
             optimizer.load_state_dict(checkpoint['optimizer'])
             print("=> loaded checkpoint '{}' (epoch {})"
                   .format(args.resume, checkpoint['epoch']))
+            del checkpoint
         else:
             print("=> no checkpoint found at '{}'".format(args.resume))
 
@@ -171,6 +164,13 @@ def main():
     # define the binarization operator
     global bin_op
     bin_op = util.BinOp(model)
+
+    for m in model.modules():
+        if isinstance(m, nn.Conv2d) or isinstance(m, nn.Linear):
+            c = float(m.weight.data[0].nelement())
+            m.weight.data = m.weight.data.normal_(0, 2.0/c)
+        elif isinstance(m, nn.BatchNorm2d):
+            m.weight.data = m.weight.data.zero_().add(1.0)
 
     for epoch in range(args.start_epoch, args.epochs):
         if args.distributed:
@@ -324,8 +324,8 @@ class AverageMeter(object):
 
 
 def adjust_learning_rate(optimizer, epoch):
-    """Sets the learning rate to the initial LR decayed by 10 every 50 epochs"""
-    lr = args.lr * (0.1 ** (epoch // 50))
+    """Sets the learning rate to the initial LR decayed by 10 every 25 epochs"""
+    lr = args.lr * (0.1 ** (epoch // 25))
     print 'Learning rate:', lr
     for param_group in optimizer.param_groups:
         param_group['lr'] = lr
