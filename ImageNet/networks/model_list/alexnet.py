@@ -68,11 +68,11 @@ class AlexNet(nn.Module):
             nn.BatchNorm2d(96, eps=1e-4, momentum=0.1, affine=True),
             nn.ReLU(inplace=True),
             nn.MaxPool2d(kernel_size=3, stride=2),
-            BinConv2d(96, 256, kernel_size=5, stride=1, padding=2, groups=2),
+            BinConv2d(96, 256, kernel_size=5, stride=1, padding=2, groups=1),
             nn.MaxPool2d(kernel_size=3, stride=2),
             BinConv2d(256, 384, kernel_size=3, stride=1, padding=1),
-            BinConv2d(384, 384, kernel_size=3, stride=1, padding=1, groups=2),
-            BinConv2d(384, 256, kernel_size=3, stride=1, padding=1, groups=2),
+            BinConv2d(384, 384, kernel_size=3, stride=1, padding=1, groups=1),
+            BinConv2d(384, 256, kernel_size=3, stride=1, padding=1, groups=1),
             nn.MaxPool2d(kernel_size=3, stride=2),
         )
         self.classifier = nn.Sequential(

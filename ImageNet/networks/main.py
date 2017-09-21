@@ -99,6 +99,13 @@ def main():
     optimizer = torch.optim.Adam(model.parameters(), args.lr,
                                 weight_decay=args.weight_decay)
 
+    for m in model.modules():
+        if isinstance(m, nn.Conv2d) or isinstance(m, nn.Linear):
+            c = float(m.weight.data[0].nelement())
+            m.weight.data = m.weight.data.normal_(0, 1.0/c)
+        elif isinstance(m, nn.BatchNorm2d):
+            m.weight.data = m.weight.data.zero_().add(1.0)
+
     # optionally resume from a checkpoint
     if args.resume:
         if os.path.isfile(args.resume):
@@ -157,20 +164,13 @@ def main():
 
     print model
 
-    if args.evaluate:
-        validate(val_loader, model, criterion)
-        return
-
     # define the binarization operator
     global bin_op
     bin_op = util.BinOp(model)
 
-    for m in model.modules():
-        if isinstance(m, nn.Conv2d) or isinstance(m, nn.Linear):
-            c = float(m.weight.data[0].nelement())
-            m.weight.data = m.weight.data.normal_(0, 2.0/c)
-        elif isinstance(m, nn.BatchNorm2d):
-            m.weight.data = m.weight.data.zero_().add(1.0)
+    if args.evaluate:
+        validate(val_loader, model, criterion)
+        return
 
     for epoch in range(args.start_epoch, args.epochs):
         if args.distributed:
