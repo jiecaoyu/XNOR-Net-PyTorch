@@ -17,7 +17,7 @@ $ python main.py --resume models/nin.best.pth.tar --evaluate
 ```
 
 ## ImageNet
-I implemented the AlexNet for the ImageNet dataset. You can download the preprocessed dataset [here](https://drive.google.com/uc?export=download&id=0B-7I62GOSnZ8aENhOEtESVFHa2M) and uncompress it. However, to use this dataset, you have to install [Caffe](https://github.com/BVLC/caffe) first.
+I implemented the AlexNet for the ImageNet dataset. You can download the preprocessed dataset [here](https://drive.google.com/uc?export=download&id=0B-7I62GOSnZ8aENhOEtESVFHa2M) and uncompress it. However, to use this dataset, you have to install [Caffe](https://github.com/BVLC/caffe) first. Support with [torchvision](https://github.com/pytorch/vision) data reader will soon be added. If you need the function now, please contact ```jiecaoyu@umich.edu```.
 
 ## Todo
 - Generate new dataset without caffe support.
