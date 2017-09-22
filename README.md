@@ -17,7 +17,24 @@ $ python main.py --resume models/nin.best.pth.tar --evaluate
 ```
 
 ## ImageNet
-I implemented the AlexNet for the ImageNet dataset. You can download the preprocessed dataset [here](https://drive.google.com/uc?export=download&id=0B-7I62GOSnZ8aENhOEtESVFHa2M) and uncompress it. However, to use this dataset, you have to install [Caffe](https://github.com/BVLC/caffe) first. Support with [torchvision](https://github.com/pytorch/vision) data reader will soon be added. If you need the function now, please contact ```jiecaoyu@umich.edu```.
+I implemented the AlexNet for the ImageNet dataset. You can download the preprocessed dataset [here](https://drive.google.com/uc?export=download&id=0B-7I62GOSnZ8aENhOEtESVFHa2M) and uncompress it. However, to use this dataset, you have to install [Caffe](https://github.com/BVLC/caffe) first. Support with [torchvision](https://github.com/pytorch/vision) data reader will soon be added. If you need the function now, please contact ```jiecaoyu@umich.edu```.  
+To set up the dataset:
+```bash
+$ cd <Repository Root>/ImageNet/networks/
+$ ln -s data <Datasets Root>
+```
+
+### AlexNet
+To train the network:
+```bash
+$ cd <Repository Root>/ImageNet/networks/
+$ python main.py
+```
+Pretrained model can be downloaded [here](https://drive.google.com/open?id=0B-7I62GOSnZ8UjJqNnR1V0dMbWs). To evaluate the pretrained model:
+```bash
+$ cp <Pretrained Model> <Repository Root>/ImageNet/networks/
+$ python main.py --resume alexnet.baseline.pth.tar --evaluate
+```
 
 ## Todo
 - Generate new dataset without caffe support.
