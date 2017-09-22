@@ -1,7 +1,8 @@
 # XNOR-Net-Pytorch
-This a PyTorch implementation of the [XNOR-Net](https://github.com/allenai/XNOR-Net).
-
-# CIFAR-10
+This a PyTorch implementation of the [XNOR-Net](https://github.com/allenai/XNOR-Net). I implemented Binarized Neural Network (BNN) for:  
+- Network-in-Network (NIN) for CIFAR-10
+- AlexNet for ImageNet
+## CIFAR-10
 
 
 ## Notes
