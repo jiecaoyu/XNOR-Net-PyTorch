@@ -17,10 +17,11 @@ $ python main.py --resume models/nin.best.pth.tar --evaluate
 ```
 
 ## ImageNet
-I implemented the AlexNet for the ImageNet dataset. You can follow the instructions [here](https://github.com/jiecaoyu/pytorch_imagenet#genearte-lmdb) to setup the dataset.
+I implemented the AlexNet for the ImageNet dataset. You can download the preprocessed dataset [here](https://drive.google.com/uc?export=download&id=0B-7I62GOSnZ8aENhOEtESVFHa2M) and uncompress it. However, to use this dataset, you have to install [Caffe](https://github.com/BVLC/caffe) first.
 
 ## Todo
-NIN for ImageNet.
+- Generate new dataset without caffe support.
+- NIN for ImageNet.
 
 ## Notes
 ### Gradients of sign function
