@@ -30,7 +30,7 @@ To train the network:
 $ cd <Repository Root>/ImageNet/networks/
 $ python main.py
 ```
-Pretrained model can be downloaded [here](https://drive.google.com/open?id=0B-7I62GOSnZ8UjJqNnR1V0dMbWs). To evaluate the pretrained model:
+Pretrained model can be downloaded [here](https://drive.google.com/open?id=0B-7I62GOSnZ8bUtZUXdZLVBtUDQ). To evaluate the pretrained model:
 ```bash
 $ cp <Pretrained Model> <Repository Root>/ImageNet/networks/
 $ python main.py --resume alexnet.baseline.pth.tar --evaluate
