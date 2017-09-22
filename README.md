@@ -1,7 +1,11 @@
 # XNOR-Net-Pytorch
 This a PyTorch implementation of the [XNOR-Net](https://github.com/allenai/XNOR-Net). I implemented Binarized Neural Network (BNN) for:  
-- Network-in-Network (NIN) for CIFAR-10
-- AlexNet for ImageNet
+
+| Dataset  | Network                  | Accuracy                    |
+|----------|:-------------------------|:----------------------------|
+| CIFAR-10 | Network-in-Network (NIN) | 86.28%                      |
+| ImageNet | AlexNet                  | Top-1: 44.87% Top-5: 69.70% |
+
 
 ## CIFAR-10
 I implemented the NIN structure for the CIFAR-10 dataset. You can download the training and validation datasets [here](https://drive.google.com/open?id=0B-7I62GOSnZ8Z0ZCVXFtVnFEaTg) and uncompress the .zip file. To run the training:
