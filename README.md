@@ -3,7 +3,13 @@ This a PyTorch implementation of the [XNOR-Net](https://github.com/allenai/XNOR-
 - Network-in-Network (NIN) for CIFAR-10
 - AlexNet for ImageNet
 ## CIFAR-10
-
+I implemented the NIN structure for the CIFAR-10 dataset. You can download the training and validation datasets [here](https://drive.google.com/open?id=0B-7I62GOSnZ8Z0ZCVXFtVnFEaTg) and uncompress the .zip file. To run the training:
+```bash
+$ cd <Repository Root>/CIFAR_10/
+$ ln -s data <Datasets Root>
+$ python main.py
+```
+Pretrained model can be downloaded [here](https://drive.google.com/open?id=0B-7I62GOSnZ8UjJqNnR1V0dMbWs).
 
 ## Notes
 ### Gradients of sign function
