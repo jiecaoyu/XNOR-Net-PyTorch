@@ -13,7 +13,7 @@ $ python main.py
 Pretrained model can be downloaded [here](https://drive.google.com/open?id=0B-7I62GOSnZ8UjJqNnR1V0dMbWs). To evaluate the pretrained model:
 ```bash
 $ cp <Pretrained Model> <Repository Root>/CIFAR_10/models/
-$ python main.py --resume models/nin.best.pth.tar --evaluate
+$ python main.py --pretrained models/nin.best.pth.tar --evaluate
 ```
 
 ## ImageNet
