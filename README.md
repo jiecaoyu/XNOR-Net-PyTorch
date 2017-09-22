@@ -39,6 +39,7 @@ Pretrained model can be downloaded [here](https://drive.google.com/open?id=0B-7I
 $ cp <Pretrained Model> <Repository Root>/ImageNet/networks/
 $ python main.py --resume alexnet.baseline.pth.tar --evaluate
 ```
+The training log can be found [here](https://raw.githubusercontent.com/jiecaoyu/XNOR-Net-PyTorch/master/ImageNet/networks/log.baseline).
 
 ## Todo
 - Generate new dataset without caffe support.
