@@ -46,7 +46,7 @@ The training log can be found [here](https://raw.githubusercontent.com/jiecaoyu/
 - NIN for ImageNet.
 
 ## Notes
-### Gradients of sign function
+### Gradients of scaled sign function
 In the paper, the gradient in backward after the scaled sign function is  
   
 ![equation](http://latex.codecogs.com/gif.latex?%5Cfrac%7B%5Cpartial%20C%7D%7B%5Cpartial%20W_i%7D%3D%5Cfrac%7B%5Cpartial%20C%7D%7B%5Cpartial%20%7B%5Cwidetilde%7BW%7D%7D_i%7D%20%28%5Cfrac%7B1%7D%7Bn%7D+%5Cfrac%7B%5Cpartial%20sign%28W_i%29%7D%7B%5Cpartial%20W_i%7D%5Ccdot%20%5Calpha%20%29)
