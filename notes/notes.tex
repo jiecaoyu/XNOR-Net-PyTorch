@@ -4,6 +4,8 @@
 \usepackage[margin=1.0in]{geometry} % Required to change the page size to A4
 \geometry{letterpaper} % Set the page size to be A4 as opposed to the default US Letter
 
+\usepackage{amsmath}
+
 % \title{\vspace{-20mm}XNOR-Net Training\vspace{-10mm}}
 % \date{}
 
@@ -11,5 +13,142 @@
 % \maketitle
 
 \section{Backward Gradient of Scaled Sign Function} % Major section
+\subsection{Forward scaled sign function}
+Assume we have the original weights $\mathbf{W}$ as
+
+\begin{equation}
+	\mathbf{W}=[W_{1},W_{2}, ..., W_{n}]
+\end{equation}
+
+In the forward pass, we need to binarize $\mathbf{W}$ to $\mathbf{\widetilde{W}}$
+
+\begin{equation}
+	\mathbf{\widetilde{W}}=[\widetilde{W}_{1},\widetilde{W}_{2}, ..., \widetilde{W}_{n}]
+\end{equation}
+
+Based on the XNOR-Net paper, the binarized weights $\mathbf{\widetilde{W}}$ is calculated by
+
+\begin{equation}
+	\mathbf{\widetilde{W}}=\alpha \cdot sign(\mathbf{W})
+\end{equation}
+\begin{equation}
+	\alpha = \frac{1}{n} \cdot {||\mathbf{W}||}_{L1} = \frac{1}{n} \cdot
+	\sum_{i=1}^{n} W_{i}
+\end{equation}
+
+which means, for each $\widetilde{W}_{i}$, we have
+
+\begin{equation}
+	\widetilde{W}_{i} =\alpha \cdot sign(W_{i}), \; i \in \{1,2,...,n\}
+\end{equation}
+
+this function is named as the scaled sign function.
+
+
+\subsection{Original backward gradient of scaled sign function}
+In the XNOR-Net paper, assuming $C$ is the cost function, the backward gradient of scaled sign function is given as
+
+\begin{equation}
+	\frac{\partial C}{\partial W_{i}} = 
+	\frac{\partial C}{\partial \widetilde{W}_{i}}
+	(\frac{1}{n}+\frac{\partial sign(W_{i})}{\partial W_{i}} \cdot \alpha)
+\end{equation}
+
+which is calculated from
+
+\begin{equation}
+	\frac{\partial C}{\partial W_{i}} = 
+	\frac{\partial C}{\partial \widetilde{W}_{i}} \cdot
+	\frac{\partial \widetilde{W}_{i}}{\partial W_{i}}
+\end{equation}
+
+The detailed steps are:
+
+\begin{equation}
+\begin{aligned}
+	\frac{\partial C}{\partial W_{i}}
+	&= 
+		\frac{\partial C}{\partial \widetilde{W}_{i}} \cdot
+		\frac{\partial \widetilde{W}_{i}}{\partial W_{i}}\\
+	&=
+		\frac{\partial C}{\partial \widetilde{W}_{i}} \cdot
+		\frac{\partial (\alpha \cdot sign(W_{i}))}{\partial W_{i}}\\
+	&=
+		\frac{\partial C}{\partial \widetilde{W}_{i}} \cdot
+		[sign(W_{i})\cdot\frac{\partial \alpha}{\partial W_{i}} + 
+		\alpha \cdot \frac{\partial sign(W_{i})}{\partial W_{i}}]\\
+	&=
+		\frac{\partial C}{\partial \widetilde{W}_{i}}
+		[\frac{1}{n}+\frac{\partial sign(W_{i})}{\partial W_{i}} \cdot \alpha]
+\end{aligned}
+\end{equation}
+
+\subsection{Correct backward gradient}
+However, the equation
+
+\begin{equation}
+	\frac{\partial C}{\partial W_{i}} = 
+	\frac{\partial C}{\partial \widetilde{W}_{i}} \cdot
+	\frac{\partial \widetilde{W}_{i}}{\partial W_{i}}
+\end{equation}
+
+is actually inaccurate. The correct equation should be
+
+\begin{equation}
+\begin{aligned}
+	\frac{\partial C}{\partial W_{i}} = 
+	\sum_{j=1}^{n} (\frac{\partial C}{\partial \widetilde{W}_j}\cdot
+	\frac{\partial \widetilde{W}_j}{\partial W_i})
+\end{aligned}
+\end{equation}
+
+Therefore, the \textbf{correct backward gradient} should be
+
+\begin{equation}
+\begin{aligned}
+	\frac{\partial C}{\partial W_{i}} &= 
+	\frac{1}{n} \cdot sign(W_{i}) \cdot 
+	\sum_{j=1}^{n}[\frac{\partial C}{\partial \widetilde{W}_j} \cdot sign(W_j)]\\
+	&\quad +
+	\frac{\partial C}{\partial \widetilde{W}_i} \cdot
+	\frac{sign(W_i)}{W_i} \cdot \alpha
+\end{aligned}
+\end{equation}
+
+The detailed steps to get this gradient are
+
+\begin{equation}
+\begin{aligned}
+	\frac{\partial C}{\partial W_{i}}
+	&= 
+	\sum_{j=1}^{n} (\frac{\partial C}{\partial \widetilde{W}_j}\cdot
+	\frac{\partial \widetilde{W}_j}{\partial W_i}) 
+	\\ &=
+	\sum_{j=1}^{n} [\frac{\partial C}{\partial \widetilde{W}_j}\cdot
+	\frac{\partial (\alpha \cdot sign(W_j))}{\partial W_i}] 
+	\\ &=
+	\sum_{j=1}^{n} [\frac{\partial C}{\partial \widetilde{W}_j}\cdot
+	(sign(W_j)\cdot\frac{\partial \alpha}{\partial W_i} + 
+	\frac{\partial sign(W_j)}{\partial W_i}\cdot\alpha)]
+	\\ &=
+	\sum_{j=1}^{n} [\frac{\partial C}{\partial \widetilde{W}_j}\cdot
+	sign(W_j)\cdot\frac{\partial \alpha}{\partial W_i}] + 
+	\frac{\partial C}{\partial \widetilde{W}_i} \cdot
+	\frac{\partial sign(W_j)}{\partial W_i}\cdot\alpha
+	\\ &=
+	\frac{\partial \alpha}{\partial W_i}\cdot
+	\sum_{j=1}^{n} [\frac{\partial C}{\partial \widetilde{W}_j}\cdot
+	sign(W_j)] + 
+	\frac{\partial C}{\partial \widetilde{W}_i} \cdot
+	\frac{\partial sign(W_j)}{\partial W_i}\cdot\alpha
+	\\ &=
+	\frac{1}{n}\cdot sign(W_i) \cdot
+	\sum_{j=1}^{n} [\frac{\partial C}{\partial \widetilde{W}_j}\cdot
+	sign(W_j)] + 
+	\frac{\partial C}{\partial \widetilde{W}_i} \cdot
+	\frac{\partial sign(W_j)}{\partial W_i}\cdot\alpha
+\end{aligned}
+\end{equation}
+
 
 \end{document}
