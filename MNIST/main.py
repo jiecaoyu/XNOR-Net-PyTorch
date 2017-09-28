@@ -6,9 +6,8 @@ import torch.nn.functional as F
 import torch.optim as optim
 import os
 import sys
-cwd = os.getcwd()
-sys.path.append(cwd+'/../')
 import models
+import util
 from torchvision import datasets, transforms
 from torch.autograd import Variable
 
@@ -108,8 +107,8 @@ if __name__=='__main__':
             help='random seed (default: 1)')
     parser.add_argument('--log-interval', type=int, default=100, metavar='N',
             help='how many batches to wait before logging training status')
-    parser.add_argument('--arch', action='store', default='LeNet_300_100',
-            help='the MNIST network structure: LeNet_300_100 | LeNet_5')
+    parser.add_argument('--arch', action='store', default='LeNet_5',
+            help='the MNIST network structure: LeNet_5')
     parser.add_argument('--pretrained', action='store', default=None,
             help='pretrained model')
     parser.add_argument('--evaluate', action='store_true', default=False,
@@ -140,9 +139,7 @@ if __name__=='__main__':
             batch_size=args.test_batch_size, shuffle=True, **kwargs)
     
     # generate the model
-    if args.arch == 'LeNet_300_100':
-        model = models.LeNet_300_100()
-    elif args.arch == 'LeNet_5':
+    if args.arch == 'LeNet_5':
         model = models.LeNet_5()
     else:
         print('ERROR: specified arch is not suppported')
