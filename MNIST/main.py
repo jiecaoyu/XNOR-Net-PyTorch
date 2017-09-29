@@ -13,14 +13,6 @@ from torch.autograd import Variable
 
 import util
 
-def load_state(model, state_dict):
-    param_dict = dict(model.named_parameters())
-    state_dict_keys = state_dict.keys()
-    for key, value in param_dict.items():
-        if key in state_dict_keys:
-            value.data.copy_(state_dict[key])
-    return
-
 def save_state(model, acc):
     print('==> Saving model ...')
     state = {
@@ -164,7 +156,7 @@ if __name__=='__main__':
     else:
         pretrained_model = torch.load(args.pretrained)
         best_acc = pretrained_model['acc']
-        load_state(model, pretrained_model['state_dict'])
+        model.load_state_dict(pretrained_model['state_dict'])
 
     if args.cuda:
         model.cuda()
