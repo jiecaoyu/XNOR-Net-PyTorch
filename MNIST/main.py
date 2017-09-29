@@ -109,12 +109,12 @@ if __name__=='__main__':
             help='number of epochs to train (default: 60)')
     parser.add_argument('--lr-epochs', type=int, default=15, metavar='N',
             help='number of epochs to decay the lr (default: 15)')
-    parser.add_argument('--lr', type=float, default=0.1, metavar='LR',
-            help='learning rate (default: 0.1)')
+    parser.add_argument('--lr', type=float, default=0.01, metavar='LR',
+            help='learning rate (default: 0.01)')
     parser.add_argument('--momentum', type=float, default=0.9, metavar='M',
             help='SGD momentum (default: 0.9)')
-    parser.add_argument('--weight-decay', '--wd', default=1e-4, type=float,
-            metavar='W', help='weight decay (default: 1e-4)')
+    parser.add_argument('--weight-decay', '--wd', default=1e-5, type=float,
+            metavar='W', help='weight decay (default: 1e-5)')
     parser.add_argument('--no-cuda', action='store_true', default=False,
             help='disables CUDA training')
     parser.add_argument('--seed', type=int, default=1, metavar='S',
