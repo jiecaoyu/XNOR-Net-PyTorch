@@ -70,6 +70,7 @@ class LeNet_5(nn.Module):
 
     def forward(self, x):
         x = self.conv1(x)
+        x = self.bn_conv1(x)
         x = self.relu_conv1(x)
         x = self.pool1(x)
         x = self.bin_conv2(x)
