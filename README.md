@@ -13,7 +13,11 @@ I implemented the LeNet-5 structure for the MNIST dataset. I am using the datase
 $ cd <Repository Root>/MNIST/
 $ python main.py
 ```
-Pretrained model can be downloaded [here]
+Pretrained model can be downloaded [here](https://drive.google.com/open?id=0B-7I62GOSnZ8R3Jzd0ozdzlJUk0). To evaluate the pretrained model:
+```bash
+$ cp <Pretrained Model> <Repository Root>/MNIST/models/
+$ python main.py --pretrained models/LeNet_5.best.pth.tar --evaluate
+```
 
 ## CIFAR-10
 I implemented the NIN structure for the CIFAR-10 dataset. You can download the training and validation datasets [here](https://drive.google.com/open?id=0B-7I62GOSnZ8Z0ZCVXFtVnFEaTg) and uncompress the .zip file. To run the training:
