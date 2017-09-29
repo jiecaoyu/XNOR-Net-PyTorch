@@ -52,7 +52,6 @@ class BinConv2d(nn.Module): # change the name of BinConv2d
             x = self.conv(x)
         else:
             x = self.linear(x)
-            print(self.linear.weight)
         x = self.relu(x)
         return x
 

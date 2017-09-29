@@ -11,6 +11,8 @@ import util
 from torchvision import datasets, transforms
 from torch.autograd import Variable
 
+import util
+
 def load_state(model, state_dict):
     param_dict = dict(model.named_parameters())
     state_dict_keys = state_dict.keys()
@@ -38,9 +40,18 @@ def train(epoch):
             data, target = data.cuda(), target.cuda()
         data, target = Variable(data), Variable(target)
         optimizer.zero_grad()
+
+        # process the weights including binarization
+        bin_op.binarization()
+
         output = model(data)
         loss = criterion(output, target)
         loss.backward()
+
+        # restore weights
+        bin_op.restore()
+        bin_op.updateBinaryGradWeight()
+
         optimizer.step()
         if batch_idx % args.log_interval == 0:
             print('Train Epoch: {} [{}/{} ({:.0f}%)]\tLoss: {:.6f}'.format(
@@ -54,6 +65,7 @@ def test(evaluate=False):
     test_loss = 0
     correct = 0
 
+    bin_op.binarization()
     for data, target in test_loader:
         if args.cuda:
             data, target = data.cuda(), target.cuda()
@@ -62,6 +74,8 @@ def test(evaluate=False):
         test_loss += criterion(output, target).data[0]
         pred = output.data.max(1, keepdim=True)[1]
         correct += pred.eq(target.data.view_as(pred)).cpu().sum()
+
+    bin_op.restore()
     
     acc = 100. * correct / len(test_loader.dataset)
     if (acc > best_acc):
@@ -163,13 +177,16 @@ if __name__=='__main__':
     
     for key, value in param_dict.items():
         params += [{'params':[value], 'lr': args.lr,
-            'momentum':args.momentum,
             'weight_decay': args.weight_decay,
             'key':key}]
     
-    optimizer = optim.SGD(params, lr=args.momentum, momentum=args.weight_decay)
+    optimizer = optim.SGD(params, lr=args.lr, momentum=args.momentum,
+            weight_decay=args.weight_decay)
 
     criterion = nn.CrossEntropyLoss()
+
+    # define the binarization operator
+    bin_op = util.BinOp(model)
 
     if args.evaluate:
         test(evaluate=True)
