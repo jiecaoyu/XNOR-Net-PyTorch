@@ -177,6 +177,7 @@ if __name__=='__main__':
     
     for key, value in param_dict.items():
         params += [{'params':[value], 'lr': args.lr,
+            'momentum':args.momentum,
             'weight_decay': args.weight_decay,
             'key':key}]
     
