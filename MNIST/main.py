@@ -177,11 +177,10 @@ if __name__=='__main__':
     
     for key, value in param_dict.items():
         params += [{'params':[value], 'lr': args.lr,
-            'momentum':args.momentum,
             'weight_decay': args.weight_decay,
             'key':key}]
     
-    optimizer = optim.SGD(params, lr=args.lr, momentum=args.momentum,
+    optimizer = optim.Adam(params, lr=args.lr,
             weight_decay=args.weight_decay)
 
     criterion = nn.CrossEntropyLoss()
