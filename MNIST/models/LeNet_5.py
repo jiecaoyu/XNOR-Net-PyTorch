@@ -52,6 +52,7 @@ class BinConv2d(nn.Module): # change the name of BinConv2d
             x = self.conv(x)
         else:
             x = self.linear(x)
+            print(self.linear.weight)
         x = self.relu(x)
         return x
 
@@ -62,12 +63,8 @@ class LeNet_5(nn.Module):
         self.bn_conv1 = nn.BatchNorm2d(20, eps=1e-4, momentum=0.1, affine=False)
         self.relu_conv1 = nn.ReLU(inplace=True)
         self.pool1 = nn.MaxPool2d(kernel_size=2, stride=2)
-        # self.conv2 = nn.Conv2d(20, 50, kernel_size=5, stride=1)
-        # self.relu_conv2 = nn.ReLU(inplace=True)
         self.bin_conv2 = BinConv2d(20, 50, kernel_size=5, stride=1, padding=0)
         self.pool2 = nn.MaxPool2d(kernel_size=2, stride=2)
-        # self.ip1 = nn.Linear(50*4*4, 500)
-        # self.relu_ip1 = nn.ReLU(inplace=True)
         self.bin_ip1 = BinConv2d(50*4*4, 500, Linear=True, previous_conv=True)
         self.ip2 = nn.Linear(500, 10)
         return
