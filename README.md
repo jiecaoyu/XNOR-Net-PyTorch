@@ -3,7 +3,7 @@ This a PyTorch implementation of the [XNOR-Net](https://github.com/allenai/XNOR-
 
 | Dataset  | Network                  | Accuracy                    | Accuracy of floating-point |
 |----------|:-------------------------|:----------------------------|:---------------------------|
-| MNIST    | LeNet-5                  | 99.17%                      | 99.34%                     |
+| MNIST    | LeNet-5                  | 99.23%                      | 99.34%                     |
 | CIFAR-10 | Network-in-Network (NIN) | 86.28%                      | 89.67%                     |
 | ImageNet | AlexNet                  | Top-1: 44.87% Top-5: 69.70% | Top-1: 57.1% Top-5: 80.2%  |
 
