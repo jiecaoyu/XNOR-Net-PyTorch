@@ -66,9 +66,18 @@ class LeNet_5(nn.Module):
         self.pool2 = nn.MaxPool2d(kernel_size=2, stride=2)
         self.bin_ip1 = BinConv2d(50*4*4, 500, Linear=True, previous_conv=True)
         self.ip2 = nn.Linear(500, 10)
+
+        for m in self.modules():
+            if isinstance(m, nn.BatchNorm2d) or isinstance(m, nn.BatchNorm1d):
+                if hasattr(m.weight, 'data'):
+                    m.weight.data.zero_().add_(1.0)
         return
 
     def forward(self, x):
+        for m in self.modules():
+            if isinstance(m, nn.BatchNorm2d) or isinstance(m, nn.BatchNorm1d):
+                if hasattr(m.weight, 'data'):
+                    m.weight.data.clamp_(min=0.01)
         x = self.conv1(x)
         x = self.bn_conv1(x)
         x = self.relu_conv1(x)
