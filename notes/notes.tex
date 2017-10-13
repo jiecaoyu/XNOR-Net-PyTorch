@@ -111,7 +111,7 @@ Therefore, the \textbf{correct backward gradient} should be
 	\sum_{j=1}^{n}[\frac{\partial C}{\partial \widetilde{W}_j} \cdot sign(W_j)]\\
 	&\quad +
 	\frac{\partial C}{\partial \widetilde{W}_i} \cdot
-	\frac{sign(W_i)}{W_i} \cdot \alpha
+	\frac{\partial sign(W_i)}{\partial W_i} \cdot \alpha
 \end{aligned}
 \end{equation}
 
