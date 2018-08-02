@@ -42,8 +42,8 @@ class BinOp():
 
     def clampConvParams(self):
         for index in range(self.num_of_params):
-            self.target_modules[index].data.clamp(-1.0, 1.0,
-                    out = self.target_modules[index].data)
+            self.target_modules[index].data = \
+                    self.target_modules[index].data.clamp(-1.0, 1.0)
 
     def save_params(self):
         for index in range(self.num_of_params):
@@ -55,8 +55,8 @@ class BinOp():
             s = self.target_modules[index].data.size()
             m = self.target_modules[index].data.norm(1, 3, keepdim=True)\
                     .sum(2, keepdim=True).sum(1, keepdim=True).div(n)
-            self.target_modules[index].data.sign()\
-                    .mul(m.expand(s), out=self.target_modules[index].data)
+            self.target_modules[index].data = \
+                    self.target_modules[index].data.sign().mul(m.expand(s))
 
     def restore(self):
         for index in range(self.num_of_params):
