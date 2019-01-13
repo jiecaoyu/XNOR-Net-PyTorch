@@ -49,7 +49,7 @@ def train(epoch):
         if batch_idx % 100 == 0:
             print('Train Epoch: {} [{}/{} ({:.0f}%)]\tLoss: {:.6f}\tLR: {}'.format(
                 epoch, batch_idx * len(data), len(trainloader.dataset),
-                100. * batch_idx / len(trainloader), loss.data[0],
+                100. * batch_idx / len(trainloader), loss.data.item(),
                 optimizer.param_groups[0]['lr']))
     return
 
@@ -63,11 +63,11 @@ def test():
         data, target = Variable(data.cuda()), Variable(target.cuda())
                                     
         output = model(data)
-        test_loss += criterion(output, target).data[0]
+        test_loss += criterion(output, target).data.item()
         pred = output.data.max(1, keepdim=True)[1]
         correct += pred.eq(target.data.view_as(pred)).cpu().sum()
     bin_op.restore()
-    acc = 100. * correct / len(testloader.dataset)
+    acc = 100. * float(correct) / len(testloader.dataset)
 
     if acc > best_acc:
         best_acc = acc
@@ -76,7 +76,7 @@ def test():
     test_loss /= len(testloader.dataset)
     print('\nTest set: Average loss: {:.4f}, Accuracy: {}/{} ({:.2f}%)'.format(
         test_loss * 128., correct, len(testloader.dataset),
-        100. * correct / len(testloader.dataset)))
+        100. * float(correct) / len(testloader.dataset)))
     print('Best Accuracy: {:.2f}%\n'.format(best_acc))
     return
 
@@ -162,7 +162,7 @@ if __name__=='__main__':
         params += [{'params':[value], 'lr': base_lr,
             'weight_decay':0.00001}]
 
-        optimizer = optim.Adam(params, lr=0.10,weight_decay=0.00001)
+    optimizer = optim.Adam(params, lr=0.10,weight_decay=0.00001)
     criterion = nn.CrossEntropyLoss()
 
     # define the binarization operator

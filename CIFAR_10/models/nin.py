@@ -31,6 +31,7 @@ class BinConv2d(nn.Module):
         self.dropout_ratio = dropout
 
         self.bn = nn.BatchNorm2d(input_channels, eps=1e-4, momentum=0.1, affine=True)
+        self.bn.weight.data = self.bn.weight.data.zero_().add(1.0)
         if dropout!=0:
             self.dropout = nn.Dropout(dropout)
         self.conv = nn.Conv2d(input_channels, output_channels,
@@ -71,6 +72,10 @@ class Net(nn.Module):
                 )
 
     def forward(self, x):
+        for m in self.modules():
+            if isinstance(m, nn.BatchNorm2d) or isinstance(m, nn.BatchNorm1d):
+                if hasattr(m.weight, 'data'):
+                    m.weight.data.clamp_(min=0.01)
         x = self.xnor(x)
         x = x.view(x.size(0), 10)
         return x
