@@ -22,16 +22,14 @@ torch.cuda.manual_seed(1)
 
 import sys
 import gc
-cwd = os.getcwd()
-sys.path.append(cwd+'/../')
-import datasets as datasets
-import datasets.transforms as transforms
 
 parser = argparse.ArgumentParser(description='PyTorch ImageNet Training')
 parser.add_argument('--arch', '-a', metavar='ARCH', default='alexnet',
                     help='model architecture (default: alexnet)')
 parser.add_argument('--data', metavar='DATA_PATH', default='./data/',
                     help='path to imagenet data (default: ./data/)')
+parser.add_argument('--caffe-data',  default=False, action='store_true',
+                    help='whether use caffe-data')
 parser.add_argument('-j', '--workers', default=8, type=int, metavar='N',
                     help='number of data loading workers (default: 8)')
 parser.add_argument('--epochs', default=100, type=int, metavar='N',
@@ -70,12 +68,6 @@ def main():
     global args, best_prec1
     args = parser.parse_args()
 
-    args.distributed = args.world_size > 1
-
-    if args.distributed:
-        dist.init_process_group(backend=args.dist_backend, init_method=args.dist_url,
-                                world_size=args.world_size)
-
     # create model
     if args.arch=='alexnet':
         model = model_list.alexnet(pretrained=args.pretrained)
@@ -83,15 +75,11 @@ def main():
     else:
         raise Exception('Model not supported yet')
 
-    if not args.distributed:
-        if args.arch.startswith('alexnet') or args.arch.startswith('vgg'):
-            model.features = torch.nn.DataParallel(model.features)
-            model.cuda()
-        else:
-            model = torch.nn.DataParallel(model).cuda()
-    else:
+    if args.arch.startswith('alexnet') or args.arch.startswith('vgg'):
+        model.features = torch.nn.DataParallel(model.features)
         model.cuda()
-        model = torch.nn.parallel.DistributedDataParallel(model)
+    else:
+        model = torch.nn.DataParallel(model).cuda()
 
     # define loss function (criterion) and optimizer
     criterion = nn.CrossEntropyLoss().cuda()
@@ -124,43 +112,81 @@ def main():
     cudnn.benchmark = True
 
     # Data loading code
-    if not os.path.exists(args.data+'/imagenet_mean.binaryproto'):
-        print("==> Data directory"+args.data+"does not exits")
-        print("==> Please specify the correct data path by")
-        print("==>     --data <DATA_PATH>")
-        return
 
-    normalize = transforms.Normalize(
-            meanfile=args.data+'/imagenet_mean.binaryproto')
+    if args.caffe_data:
+        print('==> Using Caffe Dataset')
+        cwd = os.getcwd()
+        sys.path.append(cwd+'/../')
+        import datasets as datasets
+        import datasets.transforms as transforms
+        if not os.path.exists(args.data+'/imagenet_mean.binaryproto'):
+            print("==> Data directory"+args.data+"does not exits")
+            print("==> Please specify the correct data path by")
+            print("==>     --data <DATA_PATH>")
+            return
 
-    train_dataset = datasets.ImageFolder(
-        args.data,
-        transforms.Compose([
-            transforms.RandomHorizontalFlip(),
-            transforms.ToTensor(),
-            normalize,
-            transforms.RandomSizedCrop(input_size),
-        ]),
-        Train=True)
+        normalize = transforms.Normalize(
+                meanfile=args.data+'/imagenet_mean.binaryproto')
 
-    if args.distributed:
-        train_sampler = torch.utils.data.distributed.DistributedSampler(train_dataset)
-    else:
+
+        train_dataset = datasets.ImageFolder(
+            args.data,
+            transforms.Compose([
+                transforms.RandomHorizontalFlip(),
+                transforms.ToTensor(),
+                normalize,
+                transforms.RandomSizedCrop(input_size),
+            ]),
+            Train=True)
+
         train_sampler = None
 
-    train_loader = torch.utils.data.DataLoader(
-        train_dataset, batch_size=args.batch_size, shuffle=False,
-        num_workers=args.workers, pin_memory=True, sampler=train_sampler)
+        train_loader = torch.utils.data.DataLoader(
+            train_dataset, batch_size=args.batch_size, shuffle=False,
+            num_workers=args.workers, pin_memory=True, sampler=train_sampler)
 
-    val_loader = torch.utils.data.DataLoader(
-        datasets.ImageFolder(args.data, transforms.Compose([
-            transforms.ToTensor(),
-            normalize,
-            transforms.CenterCrop(input_size),
-        ]),
-        Train=False),
-        batch_size=args.batch_size, shuffle=False,
-        num_workers=args.workers, pin_memory=True)
+        val_loader = torch.utils.data.DataLoader(
+            datasets.ImageFolder(args.data, transforms.Compose([
+                transforms.ToTensor(),
+                normalize,
+                transforms.CenterCrop(input_size),
+            ]),
+            Train=False),
+            batch_size=args.batch_size, shuffle=False,
+            num_workers=args.workers, pin_memory=True)
+    else:
+        print('==> Using Pytorch Dataset')
+        import torchvision
+        import torchvision.transforms as transforms
+        import torchvision.datasets as datasets
+        traindir = os.path.join(args.data, 'train')
+        valdir = os.path.join(args.data, 'val')
+        normalize = transforms.Normalize(mean=[0.485, 0.456, 0.406],
+                std=[0.229, 0.224, 0.225])
+
+        torchvision.set_image_backend('accimage')
+
+        train_dataset = datasets.ImageFolder(
+                traindir,
+                transforms.Compose([
+                    transforms.RandomResizedCrop(input_size, scale=(0.40, 1.0)),
+                    transforms.RandomHorizontalFlip(),
+                    transforms.ToTensor(),
+                    normalize,
+                    ]))
+
+        train_loader = torch.utils.data.DataLoader(
+                train_dataset, batch_size=args.batch_size, shuffle=True,
+                num_workers=args.workers, pin_memory=True)
+        val_loader = torch.utils.data.DataLoader(
+                datasets.ImageFolder(valdir, transforms.Compose([
+                    transforms.Resize(256),
+                    transforms.CenterCrop(input_size),
+                    transforms.ToTensor(),
+                    normalize,
+                    ])),
+                batch_size=args.batch_size, shuffle=False,
+                num_workers=args.workers, pin_memory=True)
 
     print model
 
@@ -173,8 +199,6 @@ def main():
         return
 
     for epoch in range(args.start_epoch, args.epochs):
-        if args.distributed:
-            train_sampler.set_epoch(epoch)
         adjust_learning_rate(optimizer, epoch)
 
         # train for one epoch
@@ -223,7 +247,7 @@ def train(train_loader, model, criterion, optimizer, epoch):
 
         # measure accuracy and record loss
         prec1, prec5 = accuracy(output.data, target, topk=(1, 5))
-        losses.update(loss.data[0], input.size(0))
+        losses.update(loss.data.item(), input.size(0))
         top1.update(prec1[0], input.size(0))
         top5.update(prec5[0], input.size(0))
 
