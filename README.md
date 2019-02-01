@@ -33,7 +33,12 @@ $ python main.py --pretrained models/nin.best.pth.tar --evaluate
 ```
 
 ## ImageNet
-I implemented the AlexNet for the ImageNet dataset. You can download the preprocessed dataset [here](https://drive.google.com/uc?export=download&id=0B-7I62GOSnZ8aENhOEtESVFHa2M) and uncompress it. However, to use this dataset, you have to install [Caffe](https://github.com/BVLC/caffe) first. Support with [torchvision](https://github.com/pytorch/vision) data reader will soon be added. If you need the function now, please contact ```jiecaoyu@umich.edu```.  
+I implemented the AlexNet for the ImageNet dataset.
+### Dataset
+
+The training supports [torchvision](https://github.com/pytorch/vision). But the author is still training model and tuning the hyperparameters. The pretrained model will soon be available. 
+
+If you have installed [Caffe](https://github.com/BVLC/caffe), you can download the preprocessed dataset [here](https://drive.google.com/uc?export=download&id=0B-7I62GOSnZ8aENhOEtESVFHa2M) and uncompress it. 
 To set up the dataset:
 ```bash
 $ cd <Repository Root>/ImageNet/networks/
@@ -44,12 +49,12 @@ $ ln -s <Datasets Root> data
 To train the network:
 ```bash
 $ cd <Repository Root>/ImageNet/networks/
-$ python main.py
+$ python main.py # add "--caffe-data" if you are training with the Caffe dataset
 ```
-Pretrained model can be downloaded [here](https://drive.google.com/open?id=0B-7I62GOSnZ8bUtZUXdZLVBtUDQ). To evaluate the pretrained model:
+Pretrained model can be downloaded here: [pretrained with Caffe dataset](https://drive.google.com/open?id=0B-7I62GOSnZ8bUtZUXdZLVBtUDQ); pretrained model with torchvision will soon be added. To evaluate the pretrained model:
 ```bash
 $ cp <Pretrained Model> <Repository Root>/ImageNet/networks/
-$ python main.py --resume alexnet.baseline.pth.tar --evaluate
+$ python main.py --resume alexnet.baseline.pth.tar --evaluate # add "--caffe-data" if you are training with the Caffe dataset
 ```
 The training log can be found [here](https://raw.githubusercontent.com/jiecaoyu/XNOR-Net-PyTorch/master/ImageNet/networks/log.baseline).
 
