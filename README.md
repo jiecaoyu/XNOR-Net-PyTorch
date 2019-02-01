@@ -36,7 +36,7 @@ $ python main.py --pretrained models/nin.best.pth.tar --evaluate
 I implemented the AlexNet for the ImageNet dataset.
 ### Dataset
 
-The training supports [torchvision](https://github.com/pytorch/vision). But the author is still training model and tuning the hyperparameters. The pretrained model will soon be available. 
+The training supports [torchvision](https://github.com/pytorch/vision). But the author is still training the model and tuning the hyperparameters. The pretrained model will soon be available. 
 
 If you have installed [Caffe](https://github.com/BVLC/caffe), you can download the preprocessed dataset [here](https://drive.google.com/uc?export=download&id=0B-7I62GOSnZ8aENhOEtESVFHa2M) and uncompress it. 
 To set up the dataset:
@@ -51,12 +51,12 @@ To train the network:
 $ cd <Repository Root>/ImageNet/networks/
 $ python main.py # add "--caffe-data" if you are training with the Caffe dataset
 ```
-Pretrained model can be downloaded here: [pretrained with Caffe dataset](https://drive.google.com/open?id=0B-7I62GOSnZ8bUtZUXdZLVBtUDQ); pretrained model with torchvision will soon be added. To evaluate the pretrained model:
+The pretrained models can be downloaded here: [pretrained with Caffe dataset](https://drive.google.com/open?id=0B-7I62GOSnZ8bUtZUXdZLVBtUDQ); pretrained model with torchvision will soon be added. To evaluate the pretrained model:
 ```bash
 $ cp <Pretrained Model> <Repository Root>/ImageNet/networks/
 $ python main.py --resume alexnet.baseline.pth.tar --evaluate # add "--caffe-data" if you are training with the Caffe dataset
 ```
-The training log can be found [here](https://raw.githubusercontent.com/jiecaoyu/XNOR-Net-PyTorch/master/ImageNet/networks/log.baseline).
+The training log can be found here: [Caffe dataset](https://raw.githubusercontent.com/jiecaoyu/XNOR-Net-PyTorch/master/ImageNet/networks/log.baseline); torchvision will soon be added.
 
 ## Todo
 - Generate new dataset without caffe support.
