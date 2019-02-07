@@ -90,9 +90,10 @@ def main():
     for m in model.modules():
         if isinstance(m, nn.Conv2d) or isinstance(m, nn.Linear):
             c = float(m.weight.data[0].nelement())
-            m.weight.data = m.weight.data.normal_(0, 1.0/c)
+            m.weight.data = m.weight.data.normal_(0, 2.0/c)
         elif isinstance(m, nn.BatchNorm2d):
             m.weight.data = m.weight.data.zero_().add(1.0)
+            m.bias.data = m.bias.data.zero_()
 
     # optionally resume from a checkpoint
     if args.resume:
@@ -162,14 +163,15 @@ def main():
         traindir = os.path.join(args.data, 'train')
         valdir = os.path.join(args.data, 'val')
         normalize = transforms.Normalize(mean=[0.485, 0.456, 0.406],
-                std=[0.229, 0.224, 0.225])
+                std=[1./255., 1./255., 1./255.])
 
         torchvision.set_image_backend('accimage')
 
         train_dataset = datasets.ImageFolder(
                 traindir,
                 transforms.Compose([
-                    transforms.RandomResizedCrop(input_size, scale=(0.40, 1.0)),
+                    transforms.Resize((256, 256)),
+                    transforms.RandomCrop(input_size),
                     transforms.RandomHorizontalFlip(),
                     transforms.ToTensor(),
                     normalize,
@@ -180,7 +182,7 @@ def main():
                 num_workers=args.workers, pin_memory=True)
         val_loader = torch.utils.data.DataLoader(
                 datasets.ImageFolder(valdir, transforms.Compose([
-                    transforms.Resize(256),
+                    transforms.Resize((256, 256)),
                     transforms.CenterCrop(input_size),
                     transforms.ToTensor(),
                     normalize,
@@ -349,8 +351,8 @@ class AverageMeter(object):
 
 
 def adjust_learning_rate(optimizer, epoch):
-    """Sets the learning rate to the initial LR decayed by 10 every 25 epochs"""
-    lr = args.lr * (0.1 ** (epoch // 25))
+    """Sets the learning rate to the initial LR decayed by 10 every 30 epochs"""
+    lr = args.lr * (0.1 ** (epoch // 30))
     print 'Learning rate:', lr
     for param_group in optimizer.param_groups:
         param_group['lr'] = lr
