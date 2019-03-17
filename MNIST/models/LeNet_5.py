@@ -42,7 +42,7 @@ class BinConv2d(nn.Module): # change the name of BinConv2d
                     kernel_size=kernel_size, stride=stride, padding=padding, groups=groups)
         else:
             if self.previous_conv:
-                self.bn = nn.BatchNorm2d(input_channels/size, eps=1e-4, momentum=0.1, affine=True)
+                self.bn = nn.BatchNorm2d(int(input_channels/size), eps=1e-4, momentum=0.1, affine=True)
             else:
                 self.bn = nn.BatchNorm1d(input_channels, eps=1e-4, momentum=0.1, affine=True)
             self.linear = nn.Linear(input_channels, output_channels)

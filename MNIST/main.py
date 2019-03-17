@@ -48,7 +48,7 @@ def train(epoch):
         if batch_idx % args.log_interval == 0:
             print('Train Epoch: {} [{}/{} ({:.0f}%)]\tLoss: {:.6f}'.format(
                 epoch, batch_idx * len(data), len(train_loader.dataset),
-                100. * batch_idx / len(train_loader), loss.data[0]))
+                100. * batch_idx / len(train_loader), loss.data.item()))
     return
 
 def test(evaluate=False):
@@ -63,13 +63,13 @@ def test(evaluate=False):
             data, target = data.cuda(), target.cuda()
         data, target = Variable(data, volatile=True), Variable(target)
         output = model(data)
-        test_loss += criterion(output, target).data[0]
+        test_loss += criterion(output, target).data.item()
         pred = output.data.max(1, keepdim=True)[1]
         correct += pred.eq(target.data.view_as(pred)).cpu().sum()
 
     bin_op.restore()
     
-    acc = 100. * correct / len(test_loader.dataset)
+    acc = 100. * float(correct) / len(test_loader.dataset)
     if (acc > best_acc):
         best_acc = acc
         if not evaluate:
@@ -78,7 +78,7 @@ def test(evaluate=False):
     test_loss /= len(test_loader.dataset)
     print('\nTest set: Average loss: {:.4f}, Accuracy: {}/{} ({:.2f}%)'.format(
         test_loss * args.batch_size, correct, len(test_loader.dataset),
-        100. * correct / len(test_loader.dataset)))
+        100. * float(correct) / len(test_loader.dataset)))
     print('Best Accuracy: {:.2f}%\n'.format(best_acc))
     return
 
