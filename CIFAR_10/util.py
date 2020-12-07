@@ -35,7 +35,6 @@ class BinOp():
 
     def meancenterConvParams(self):
         for index in range(self.num_of_params):
-            s = self.target_modules[index].data.size()
             negMean = self.target_modules[index].data.mean(1, keepdim=True).\
                     mul(-1).expand_as(self.target_modules[index].data)
             self.target_modules[index].data = self.target_modules[index].data.add(negMean)
