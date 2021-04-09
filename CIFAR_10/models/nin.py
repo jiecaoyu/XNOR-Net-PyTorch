@@ -2,7 +2,7 @@ import torch.nn as nn
 import torch
 import torch.nn.functional as F
 
-class BinActive(torch.autograd.Function)
+class BinActive(torch.autograd.Function):
     @staticmethod
     def forward(self, input):
         self.save_for_backward(input)
