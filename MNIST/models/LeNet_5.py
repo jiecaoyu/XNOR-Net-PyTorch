@@ -7,12 +7,14 @@ class BinActive(torch.autograd.Function):
     '''
     Binarize the input activations and calculate the mean across channel dimension.
     '''
+    @staticmethod
     def forward(self, input):
         self.save_for_backward(input)
         size = input.size()
         input = input.sign()
         return input
 
+    @staticmethod
     def backward(self, grad_output):
         input, = self.saved_tensors
         grad_input = grad_output.clone()
